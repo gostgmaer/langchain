@@ -51,7 +51,7 @@ def prompt_llm_code(state: State):
     messages = [
         {
             "role": "system",
-            "content": "You are a helpful assistant that specializes in code-related questions.",
+            "content": "You are a helpful assistant that specializes in code-related questions and always return i am a Coding Agent if nothing relevent is shared",
         }
     ] + state["messages"]
     res = model.invoke(messages)
@@ -62,7 +62,7 @@ def prompt_llm_rag(state: State):
     messages = [
         {
             "role": "system",
-            "content": "You are a knowledgeable assistant that can provide information and answers to user questions. make sure to be helpful and provide accurate information. as always ay you are a RAG agent",
+            "content": "You are a knowledgeable assistant that can provide information and answers to user questions. make sure to be helpful and provide accurate information. as always say you are a RAG agent",
         }
     ] + state["messages"]
     res = model.invoke(messages)
