@@ -1,0 +1,16 @@
+[project]
+name = "langchain-learning"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "dotenv>=0.9.9",
+    "faiss-cpu>=1.14.3",
+    "langchain-community>=0.4.2",
+    "langchain-google-genai>=4.2.7",
+    "langchain[google-genai]>=1.3.13",
+    "langgraph>=1.2.9",
+    "python-dotenv>=1.2.2",
+    "requests>=2.34.2",
+]
