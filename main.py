@@ -3,7 +3,7 @@ from langchain.messages import SystemMessage,AIMessage,HumanMessage,UsageMetadat
 # from tool.weather import agent, Context
 from config.setting import MODEL, API_KEY
 
-from longgraph.memory import run_chat
+from langgraph.memory import run_chat
 
 if __name__ == "__main__":
     print("Starting longgraph memory chat from main.py...")
