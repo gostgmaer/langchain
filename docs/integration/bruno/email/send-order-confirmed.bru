@@ -1,0 +1,37 @@
+meta {
+  name: Send Order Confirmed Email
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{BASE_URL}}/v1/email/send
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{API_KEY}}
+}
+
+headers {
+  Content-Type: application/json
+  x-tenant-id: {{TENANT_ID}}
+  x-app-name: MyShop
+  x-app-url: https://myshop.com
+  x-path: /orders/ORD-2026-001
+  x-idempotency-key: order-confirm-ORD-2026-001
+}
+
+body:json {
+  {
+    "to": "customer@example.com",
+    "template": "ORDER_CONFIRMED",
+    "data": {
+      "username": "Jane Doe",
+      "orderId": "ORD-2026-001",
+      "totalAmount": "1499.00",
+      "estimatedDelivery": "2026-04-25T00:00:00.000Z"
+    }
+  }
+}

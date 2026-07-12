@@ -7,6 +7,7 @@ from langchain_core.documents import Document
 from langchain.messages import AIMessage
 
 from services.uicli import print_ai_response, print_documents
+
 # Gemini Developer API
 # embeddings = GoogleGenerativeAIEmbeddings(
 #     model="gemini-embedding-001",

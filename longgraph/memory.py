@@ -6,8 +6,9 @@ from services.model import model, embedding
 from services.uicli import print_ai_response
 from langgraph.checkpoint.memory import InMemorySaver
 import uuid
+import os
 from pydantic import BaseModel, Field
-
+from langchain_community.vectorstores import FAISS
 
 class IntenseClassifier(BaseModel):
     message_intent: Literal["code", "knowledge", "chat"] = Field(
@@ -58,11 +59,29 @@ def prompt_llm_code(state: State):
     return {"messages": {"role": "assistant", "content": res.content}}
 
 
+def get_retriever():
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    index_path = os.path.join(base_dir, "faiss_index")
+    if not os.path.exists(index_path):
+        return None
+    vectorstore = FAISS.load_local(index_path, embedding, allow_dangerous_deserialization=True)
+    return vectorstore.as_retriever(search_kwargs={"k": 5})
+
 def prompt_llm_rag(state: State):
+    query = state["messages"][-1].content
+    retriever = get_retriever()
+    
+    context = ""
+    if retriever:
+        docs = retriever.invoke(query)
+        context = "\n\n".join([doc.page_content for doc in docs])
+    else:
+        context = "No documents indexed yet."
+
     messages = [
         {
             "role": "system",
-            "content": "You are a knowledgeable assistant that can provide information and answers to user questions. make sure to be helpful and provide accurate information. as always say you are a RAG agent",
+            "content": f"You are a knowledgeable assistant that provides information based on the following context. \n\nContext:\n{context}\n\nAnswer the user's question based on this context.",
         }
     ] + state["messages"]
     res = model.invoke(messages)

@@ -1,0 +1,28 @@
+meta {
+  name: Send OTP SMS
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/v1/sms/otp/send
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{API_KEY}}
+}
+
+headers {
+  Content-Type: application/json
+  x-tenant-id: {{TENANT_ID}}
+}
+
+body:json {
+  {
+    "to": "+919876543210",
+    "otpLength": 6,
+    "expiresInMinutes": 10
+  }
+}

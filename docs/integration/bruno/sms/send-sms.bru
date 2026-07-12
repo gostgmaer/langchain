@@ -1,0 +1,29 @@
+meta {
+  name: Send SMS
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{BASE_URL}}/v1/sms/send
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{API_KEY}}
+}
+
+headers {
+  Content-Type: application/json
+  x-tenant-id: {{TENANT_ID}}
+}
+
+body:json {
+  {
+    "to": "+919876543210",
+    "message": "Your order has been shipped!",
+    "messageType": "TRANSACTIONAL",
+    "referenceId": "order-shipped-ORD-2026-001"
+  }
+}

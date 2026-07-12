@@ -1,0 +1,389 @@
+{
+  "info": {
+    "_postman_id": "easydev-notification-service-v1",
+    "name": "Notification Service API",
+    "description": "Complete Postman collection for the EasyDev Notification Service.\n\nAuthentication: Set the `API_KEY` collection variable to your API key.\n\nBase URL: Set `BASE_URL` to your service URL (default: http://localhost:4000).\nTenant ID: Set `TENANT_ID` to your tenant identifier.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:4000", "type": "string" },
+    { "key": "API_KEY", "value": "your_api_key_here", "type": "string" },
+    { "key": "TENANT_ID", "value": "tenant_abc", "type": "string" },
+    { "key": "APP_NAME", "value": "MyApp", "type": "string" },
+    { "key": "APP_URL", "value": "https://myapp.com", "type": "string" }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "Authorization", "type": "string" },
+      { "key": "value", "value": "Bearer {{API_KEY}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/v1/health", "host": ["{{BASE_URL}}"], "path": ["v1", "health"] }
+          }
+        },
+        {
+          "name": "Health Detailed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/v1/health/detailed", "host": ["{{BASE_URL}}"], "path": ["v1", "health", "detailed"] }
+          }
+        },
+        {
+          "name": "Health Liveness",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/v1/health/live", "host": ["{{BASE_URL}}"], "path": ["v1", "health", "live"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Email",
+      "item": [
+        {
+          "name": "Send Welcome Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" },
+              { "key": "x-app-name", "value": "{{APP_NAME}}" },
+              { "key": "x-app-url", "value": "{{APP_URL}}" },
+              { "key": "x-path", "value": "/dashboard" },
+              { "key": "x-idempotency-key", "value": "welcome-usr_123" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"john@example.com\",\n  \"template\": \"USER_WELCOME\",\n  \"data\": {\n    \"username\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"verifyLink\": \"https://myapp.com/verify?token=abc123\"\n  }\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/email/send", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "send"] }
+          }
+        },
+        {
+          "name": "Send OTP Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" },
+              { "key": "x-app-name", "value": "{{APP_NAME}}" },
+              { "key": "x-app-url", "value": "{{APP_URL}}" },
+              { "key": "x-idempotency-key", "value": "otp-usr_123-20260602" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"john@example.com\",\n  \"template\": \"otpEmailTemplate\",\n  \"data\": {\n    \"name\": \"John Doe\",\n    \"otp\": \"847291\",\n    \"purpose\": \"login\",\n    \"expiryMinutes\": 10\n  }\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/email/send", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "send"] }
+          }
+        },
+        {
+          "name": "Send Order Confirmed Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" },
+              { "key": "x-app-name", "value": "MyShop" },
+              { "key": "x-app-url", "value": "https://myshop.com" },
+              { "key": "x-path", "value": "/orders/ORD-2026-001" },
+              { "key": "x-idempotency-key", "value": "order-confirm-ORD-2026-001" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"customer@example.com\",\n  \"template\": \"ORDER_CONFIRMED\",\n  \"data\": {\n    \"username\": \"Jane Doe\",\n    \"orderId\": \"ORD-2026-001\",\n    \"totalAmount\": \"1499.00\",\n    \"estimatedDelivery\": \"2026-04-25T00:00:00.000Z\"\n  }\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/email/send", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "send"] }
+          }
+        },
+        {
+          "name": "Send Payment Success Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" },
+              { "key": "x-app-name", "value": "{{APP_NAME}}" },
+              { "key": "x-app-url", "value": "{{APP_URL}}" },
+              { "key": "x-idempotency-key", "value": "payment-TXN-ABC-123456" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"user@example.com\",\n  \"template\": \"PAYMENT_SUCCESS\",\n  \"data\": {\n    \"username\": \"John Doe\",\n    \"amount\": \"1499.00\",\n    \"transactionId\": \"TXN-ABC-123456\",\n    \"paymentMethod\": \"UPI\",\n    \"date\": \"2026-04-22T20:00:00.000Z\"\n  }\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/email/send", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "send"] }
+          }
+        },
+        {
+          "name": "Send System Alert Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" },
+              { "key": "x-app-name", "value": "{{APP_NAME}}" },
+              { "key": "x-app-url", "value": "{{APP_URL}}" },
+              { "key": "x-idempotency-key", "value": "alert-webhook-fail-20260602" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"ops@example.com\",\n  \"template\": \"SYSTEM_ALERT\",\n  \"data\": {\n    \"alertType\": \"WEBHOOK_FAILURE\",\n    \"severity\": \"HIGH\",\n    \"message\": \"Webhook to https://api.example.com/hook failed after 3 retries\",\n    \"detectedAt\": \"2026-06-02T10:00:00.000Z\"\n  }\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/email/send", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "send"] }
+          }
+        },
+        {
+          "name": "Send Email Sync",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" },
+              { "key": "x-app-name", "value": "{{APP_NAME}}" },
+              { "key": "x-app-url", "value": "{{APP_URL}}" },
+              { "key": "x-idempotency-key", "value": "sync-test-001" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"john@example.com\",\n  \"template\": \"PASSWORD_CHANGED\",\n  \"data\": {\n    \"username\": \"John Doe\"\n  }\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/email/send-sync", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "send-sync"] }
+          }
+        },
+        {
+          "name": "Email Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/v1/email/metrics", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "metrics"] }
+          }
+        },
+        {
+          "name": "Email Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/email/logs?page=1&limit=20",
+              "host": ["{{BASE_URL}}"],
+              "path": ["v1", "email", "logs"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Email SMTP Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/v1/email/health", "host": ["{{BASE_URL}}"], "path": ["v1", "email", "health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SMS",
+      "item": [
+        {
+          "name": "Send SMS",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"+919876543210\",\n  \"message\": \"Your order has been shipped!\",\n  \"messageType\": \"TRANSACTIONAL\",\n  \"referenceId\": \"order-shipped-ORD-2026-001\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/sms/send", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "send"] }
+          }
+        },
+        {
+          "name": "Send SMS with Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"+919876543210\",\n  \"templateCode\": \"ORDER_SHIPPED\",\n  \"variables\": {\n    \"orderId\": \"ORD-2026-001\",\n    \"trackingUrl\": \"https://track.example.com/ORD-2026-001\"\n  },\n  \"messageType\": \"TRANSACTIONAL\",\n  \"referenceId\": \"shipped-ORD-2026-001\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/sms/send", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "send"] }
+          }
+        },
+        {
+          "name": "Send Bulk SMS",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipients\": [\n    { \"to\": \"+919876543210\", \"variables\": { \"name\": \"John\" } },\n    { \"to\": \"+919876543211\", \"variables\": { \"name\": \"Jane\" } }\n  ],\n  \"templateCode\": \"FLASH_SALE\",\n  \"messageType\": \"PROMOTIONAL\",\n  \"campaignId\": \"summer-sale-2026\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/sms/send-bulk", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "send-bulk"] }
+          }
+        },
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"+919876543210\",\n  \"otpLength\": 6,\n  \"expiresInMinutes\": 10\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/sms/otp/send", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "otp", "send"] }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"+919876543210\",\n  \"otp\": \"847291\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/sms/otp/verify", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "otp", "verify"] }
+          }
+        },
+        {
+          "name": "List SMS Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/sms?page=1&limit=20",
+              "host": ["{{BASE_URL}}"],
+              "path": ["v1", "sms"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SMS Templates",
+      "item": [
+        {
+          "name": "Create SMS Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"ORDER_SHIPPED\",\n  \"name\": \"Order Shipped\",\n  \"body\": \"Hi {{name}}, your order #{{orderId}} has shipped! Track: {{trackingUrl}}\",\n  \"type\": \"TRANSACTIONAL\",\n  \"variables\": [\"name\", \"orderId\", \"trackingUrl\"]\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/sms/templates", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "templates"] }
+          }
+        },
+        {
+          "name": "List SMS Templates",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "url": { "raw": "{{BASE_URL}}/v1/sms/templates", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "templates"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "SMS Analytics",
+      "item": [
+        {
+          "name": "Analytics Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-tenant-id", "value": "{{TENANT_ID}}" }
+            ],
+            "url": { "raw": "{{BASE_URL}}/v1/sms/analytics/summary", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "analytics", "summary"] }
+          }
+        },
+        {
+          "name": "Provider Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{BASE_URL}}/v1/sms/analytics/provider-health", "host": ["{{BASE_URL}}"], "path": ["v1", "sms", "analytics", "provider-health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "Simulate Twilio DLR",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-twilio-signature", "value": "test-signature" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"MessageSid\": \"SMxxxxxxxxxxxxxxxx\",\n  \"MessageStatus\": \"delivered\",\n  \"To\": \"+919876543210\",\n  \"From\": \"+12025550123\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/webhooks/twilio", "host": ["{{BASE_URL}}"], "path": ["v1", "webhooks", "twilio"] }
+          }
+        },
+        {
+          "name": "Simulate Vonage DLR",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-nexmo-signature", "value": "test-signature" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"messageId\": \"0A000000B0B0B0B0\",\n  \"to\": \"919876543210\",\n  \"status\": \"delivered\",\n  \"timestamp\": \"2026-06-02 10:15:00\"\n}"
+            },
+            "url": { "raw": "{{BASE_URL}}/v1/webhooks/vonage", "host": ["{{BASE_URL}}"], "path": ["v1", "webhooks", "vonage"] }
+          }
+        }
+      ]
+    }
+  ]
+}

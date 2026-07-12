@@ -1,0 +1,984 @@
+﻿openapi: 3.0.3
+info:
+  title: Notification Service API
+  description: |
+    Multi-channel notification service supporting Email and SMS delivery.
+    Swagger UI is available at `/docs` in non-production environments.
+  version: "1.0.0"
+  contact:
+    name: Notification Service
+
+servers:
+  - url: http://localhost:4000
+    description: Local development
+
+security:
+  - ApiKeyHeader: []
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyHeader:
+      type: apiKey
+      in: header
+      name: x-api-key
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+  parameters:
+    TenantId:
+      name: x-tenant-id
+      in: header
+      required: true
+      schema:
+        type: string
+      example: tenant_abc
+    AppName:
+      name: x-app-name
+      in: header
+      required: true
+      schema:
+        type: string
+      example: MyApp
+    AppUrl:
+      name: x-app-url
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uri
+      example: https://myapp.com
+    CtaPath:
+      name: x-path
+      in: header
+      required: false
+      schema:
+        type: string
+      example: /dashboard
+    IdempotencyKey:
+      name: x-idempotency-key
+      in: header
+      required: true
+      schema:
+        type: string
+      example: unique-key-001
+
+  schemas:
+    Success202:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+
+    SendEmailDto:
+      type: object
+      required: [to]
+      properties:
+        to:
+          type: string
+          format: email
+        from:
+          type: string
+          format: email
+        fromName:
+          type: string
+        cc:
+          type: array
+          items:
+            type: string
+            format: email
+        bcc:
+          type: array
+          items:
+            type: string
+            format: email
+        subject:
+          type: string
+        template:
+          type: string
+          description: Template name (e.g. USER_WELCOME)
+        templateId:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
+        idempotencyKey:
+          type: string
+        metadata:
+          type: object
+
+    SendSmsDto:
+      type: object
+      required: [to]
+      properties:
+        to:
+          type: string
+          example: "+919876543210"
+        from:
+          type: string
+        message:
+          type: string
+          maxLength: 1600
+        templateId:
+          type: string
+        templateCode:
+          type: string
+        templateName:
+          type: string
+        variables:
+          type: object
+          additionalProperties:
+            type: string
+        messageType:
+          type: string
+          enum: [TRANSACTIONAL, PROMOTIONAL, OTP, FLASH]
+          default: TRANSACTIONAL
+        unicode:
+          type: boolean
+        referenceId:
+          type: string
+        dltTemplateId:
+          type: string
+        dltEntityId:
+          type: string
+        metadata:
+          type: object
+
+    SendBulkSmsDto:
+      type: object
+      required: [recipients]
+      properties:
+        recipients:
+          type: array
+          items:
+            type: object
+            required: [to]
+            properties:
+              to:
+                type: string
+              message:
+                type: string
+              variables:
+                type: object
+        message:
+          type: string
+        templateId:
+          type: string
+        templateCode:
+          type: string
+        templateName:
+          type: string
+        from:
+          type: string
+        messageType:
+          type: string
+          enum: [TRANSACTIONAL, PROMOTIONAL, OTP, FLASH]
+        batchSize:
+          type: integer
+          minimum: 1
+          maximum: 500
+          default: 100
+
+    SendOtpDto:
+      type: object
+      required: [to]
+      properties:
+        to:
+          type: string
+          example: "+919876543210"
+        templateCode:
+          type: string
+        templateId:
+          type: string
+        variables:
+          type: object
+        otpLength:
+          type: integer
+          minimum: 4
+          maximum: 8
+          default: 6
+        expiresInMinutes:
+          type: integer
+          minimum: 1
+          maximum: 60
+          default: 10
+
+    VerifyOtpDto:
+      type: object
+      required: [to, otp]
+      properties:
+        to:
+          type: string
+        otp:
+          type: string
+
+    SmsLog:
+      type: object
+      properties:
+        _id:
+          type: string
+        messageId:
+          type: string
+        tenantId:
+          type: string
+        to:
+          type: string
+        message:
+          type: string
+        status:
+          type: string
+          enum: [QUEUED, SENDING, SENT, DELIVERED, FAILED, UNDELIVERED, REJECTED, UNKNOWN, RETRYING, PURGED]
+        provider:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          format: date-time
+
+    SmsTemplate:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        code:
+          type: string
+        body:
+          type: string
+        variables:
+          type: array
+          items:
+            type: string
+        provider:
+          type: string
+        messageType:
+          type: string
+        isActive:
+          type: boolean
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, error]
+        info:
+          type: object
+        error:
+          type: object
+        details:
+          type: object
+
+paths:
+  # ── Health ─────────────────────────────────────────────────────────────────
+  /v1/health:
+    get:
+      tags: [Health]
+      summary: Full health check (MongoDB + memory)
+      security: []
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: Unhealthy
+
+  /v1/health/live:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      security: []
+      responses:
+        "200":
+          description: Alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /v1/health/detailed:
+    get:
+      tags: [Health]
+      summary: Detailed health check (MongoDB + heap + RSS)
+      security: []
+      responses:
+        "200":
+          description: Detailed health info
+
+  # ── Email ──────────────────────────────────────────────────────────────────
+  /v1/email/send:
+    post:
+      tags: [Email]
+      summary: Send email (async, queued when BullMQ enabled)
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/AppName"
+        - $ref: "#/components/parameters/AppUrl"
+        - $ref: "#/components/parameters/CtaPath"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEmailDto"
+            example:
+              to: john@example.com
+              template: USER_WELCOME
+              data:
+                username: John Doe
+                email: john@example.com
+      responses:
+        "202":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success202"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+        "429":
+          description: Rate limited
+        "503":
+          description: Circuit breaker open
+
+  /v1/email/send-sync:
+    post:
+      tags: [Email]
+      summary: Send email synchronously (waits for SMTP response)
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - $ref: "#/components/parameters/AppName"
+        - $ref: "#/components/parameters/AppUrl"
+        - $ref: "#/components/parameters/CtaPath"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEmailDto"
+      responses:
+        "200":
+          description: Sent
+        "400":
+          description: Validation error
+        "503":
+          description: SMTP / circuit breaker failure
+
+  /v1/email/metrics:
+    get:
+      tags: [Email]
+      summary: Email sending metrics and circuit breaker state
+      responses:
+        "200":
+          description: Metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      totalSent:
+                        type: integer
+                      totalFailed:
+                        type: integer
+                      circuitBreaker:
+                        type: object
+                        properties:
+                          state:
+                            type: string
+                            enum: [CLOSED, OPEN, HALF_OPEN]
+
+  /v1/email/logs:
+    get:
+      tags: [Email]
+      summary: List email logs
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: Email logs list
+
+  /v1/email/logs/{requestId}:
+    get:
+      tags: [Email]
+      summary: Get email log by requestId
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Email log
+        "404":
+          description: Not found
+
+  /v1/email/health:
+    get:
+      tags: [Email]
+      summary: SMTP connection health
+      responses:
+        "200":
+          description: SMTP is healthy
+        "503":
+          description: SMTP unreachable
+
+  # ── SMS ───────────────────────────────────────────────────────────────────
+  /v1/sms/send:
+    post:
+      tags: [SMS]
+      summary: Send a single SMS
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendSmsDto"
+      responses:
+        "202":
+          description: Accepted
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+
+  /v1/sms/send-bulk:
+    post:
+      tags: [SMS]
+      summary: Send bulk SMS to multiple recipients
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendBulkSmsDto"
+      responses:
+        "202":
+          description: Accepted — bulk job queued
+        "400":
+          description: Validation error
+
+  /v1/sms:
+    get:
+      tags: [SMS]
+      summary: List SMS logs
+      parameters:
+        - name: tenantId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        "200":
+          description: SMS logs list
+
+  /v1/sms/{messageId}:
+    get:
+      tags: [SMS]
+      summary: Get SMS log by messageId
+      parameters:
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: SMS log
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SmsLog"
+        "404":
+          description: Not found
+
+  /v1/sms/{messageId}/gdpr-purge:
+    delete:
+      tags: [SMS]
+      summary: GDPR erasure — purge PII from SMS log
+      parameters:
+        - name: messageId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Purged
+        "404":
+          description: Not found
+
+  /v1/sms/otp/send:
+    post:
+      tags: [OTP]
+      summary: Send an OTP via SMS
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOtpDto"
+      responses:
+        "202":
+          description: OTP sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      referenceId:
+                        type: string
+        "400":
+          description: Validation error
+
+  /v1/sms/otp/verify:
+    post:
+      tags: [OTP]
+      summary: Verify an OTP
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyOtpDto"
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      valid:
+                        type: boolean
+
+  # ── SMS Templates ─────────────────────────────────────────────────────────
+  /v1/templates:
+    get:
+      tags: [Templates]
+      summary: List SMS templates
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Templates list
+    post:
+      tags: [Templates]
+      summary: Create SMS template
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmsTemplate"
+      responses:
+        "201":
+          description: Created
+
+  /v1/templates/{id}:
+    get:
+      tags: [Templates]
+      summary: Get template by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Template
+        "404":
+          description: Not found
+    put:
+      tags: [Templates]
+      summary: Update template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SmsTemplate"
+      responses:
+        "200":
+          description: Updated
+    delete:
+      tags: [Templates]
+      summary: Delete template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+
+  /v1/templates/import:
+    post:
+      tags: [Templates]
+      summary: Bulk import SMS templates
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                templates:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/SmsTemplate"
+      responses:
+        "201":
+          description: Imported
+
+  # ── Analytics ─────────────────────────────────────────────────────────────
+  /v1/analytics/summary:
+    get:
+      tags: [Analytics]
+      summary: SMS delivery analytics summary
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: provider
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Analytics summary
+
+  /v1/analytics/provider-health:
+    get:
+      tags: [Analytics]
+      summary: SMS provider health (last 24h delivery rates)
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Provider health data
+
+  /v1/analytics/campaigns:
+    get:
+      tags: [Analytics]
+      summary: List SMS campaigns
+      parameters:
+        - $ref: "#/components/parameters/TenantId"
+      responses:
+        "200":
+          description: Campaigns list
+
+  # ── Webhooks ──────────────────────────────────────────────────────────────
+  /v1/webhooks/twilio:
+    post:
+      tags: [Webhooks]
+      summary: Twilio delivery status webhook
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/vonage:
+    post:
+      tags: [Webhooks]
+      summary: Vonage delivery receipt webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/msg91:
+    post:
+      tags: [Webhooks]
+      summary: MSG91 delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/fast2sms:
+    post:
+      tags: [Webhooks]
+      summary: Fast2SMS delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/textlocal:
+    post:
+      tags: [Webhooks]
+      summary: TextLocal delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/gupshup:
+    post:
+      tags: [Webhooks]
+      summary: Gupshup delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/kaleyra:
+    post:
+      tags: [Webhooks]
+      summary: Kaleyra delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/exotel:
+    post:
+      tags: [Webhooks]
+      summary: Exotel delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/infobip:
+    post:
+      tags: [Webhooks]
+      summary: Infobip delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/telnyx:
+    post:
+      tags: [Webhooks]
+      summary: Telnyx delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/sinch:
+    post:
+      tags: [Webhooks]
+      summary: Sinch delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/plivo:
+    post:
+      tags: [Webhooks]
+      summary: Plivo delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/d7networks:
+    post:
+      tags: [Webhooks]
+      summary: D7Networks delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/jiocx:
+    post:
+      tags: [Webhooks]
+      summary: JioCX delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/airteliq:
+    post:
+      tags: [Webhooks]
+      summary: AirtelIQ delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/routemobile:
+    post:
+      tags: [Webhooks]
+      summary: Route Mobile delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/valuefirst:
+    post:
+      tags: [Webhooks]
+      summary: ValueFirst delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/smscountry:
+    post:
+      tags: [Webhooks]
+      summary: SMSCountry delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+  /v1/webhooks/smsgateway:
+    post:
+      tags: [Webhooks]
+      summary: SMSGateway delivery webhook
+      security: []
+      responses:
+        "200":
+          description: Acknowledged
+
+tags:
+  - name: Health
+    description: Service health and liveness checks
+  - name: Email
+    description: Email sending and log management
+  - name: SMS
+    description: SMS sending and log management
+  - name: OTP
+    description: OTP generation and verification
+  - name: Templates
+    description: SMS template CRUD
+  - name: Analytics
+    description: SMS delivery analytics and provider health
+  - name: Webhooks
+    description: Provider delivery status webhooks (no authentication)

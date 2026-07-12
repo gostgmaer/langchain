@@ -1,0 +1,36 @@
+meta {
+  name: Send Welcome Email
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{BASE_URL}}/v1/email/send
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{API_KEY}}
+}
+
+headers {
+  Content-Type: application/json
+  x-tenant-id: {{TENANT_ID}}
+  x-app-name: {{APP_NAME}}
+  x-app-url: {{APP_URL}}
+  x-path: /dashboard
+  x-idempotency-key: welcome-usr_123
+}
+
+body:json {
+  {
+    "to": "john@example.com",
+    "template": "USER_WELCOME",
+    "data": {
+      "username": "John Doe",
+      "email": "john@example.com",
+      "verifyLink": "https://myapp.com/verify?token=abc123"
+    }
+  }
+}

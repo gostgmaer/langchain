@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "name": "Notification Service",
+  "variables": [
+    { "name": "BASE_URL", "value": "http://localhost:4000" },
+    { "name": "API_KEY", "value": "your_api_key_here" },
+    { "name": "TENANT_ID", "value": "tenant_abc" },
+    { "name": "APP_NAME", "value": "MyApp" },
+    { "name": "APP_URL", "value": "https://myapp.com" }
+  ]
+}
