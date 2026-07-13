@@ -498,6 +498,23 @@ wheels = [
 ]
 
 [[package]]
+name = "groq"
+version = "0.37.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e9/78/18948a9056e1509c87e10ab8316a90ecce87035fbd53342dffdf97f4de00/groq-0.37.1.tar.gz", hash = "sha256:7353d6dfb60834fd7aacbb86af106e2dc2aeaff6d0edd65fb2fd0f16bd39314c", size = 145289, upload-time = "2025-12-04T18:08:07.118Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5f/d6/645a081750e43f858b7d09dce5d8e1e76cf11e7e4bdba81252e04f78963d/groq-0.37.1-py3-none-any.whl", hash = "sha256:b49f8c8898c55eaec9f71f1342f3fcacc9560d67a08ce5f35fbfb84e8dacd3da", size = 137494, upload-time = "2025-12-04T18:08:05.801Z" },
+]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -687,11 +704,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/95/c6/dc676c632f3d20c88789b0726c43ad5e039c25338cc3bb7090fc247d1522/langchain-1.3.13-py3-none-any.whl", hash = "sha256:20a8fe4b1dea7db74356f7d2b5455c4970099b9f7f53c2122ea97f115c907fbd", size = 136911, upload-time = "2026-07-10T23:06:07.012Z" },
 ]
 
-[package.optional-dependencies]
-google-genai = [
-    { name = "langchain-google-genai" },
-]
-
 [[package]]
 name = "langchain-classic"
 version = "1.0.8"
@@ -768,6 +780,19 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-groq"
+version = "1.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "groq" },
+    { name = "langchain-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6e/4d/64b5e57e9e43f009fcb1591f567f0095bcf38f0b705a2d63cec4c04e0d56/langchain_groq-1.1.3.tar.gz", hash = "sha256:890c099a55526bceafc3e696d123cb9d36464c6664a3ead34ae6e09e0d50caeb", size = 192228, upload-time = "2026-06-10T04:16:08.009Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/5d/2f862bf5623d5c8ca6ed8a8917a7b1410e6d3595ee0bac12aff508556f76/langchain_groq-1.1.3-py3-none-any.whl", hash = "sha256:a69bb8212b7a699f407c033bf41ca526db8de68f438d51a41740a72bf6dc09bf", size = 20779, upload-time = "2026-06-10T04:16:06.754Z" },
+]
+
+[[package]]
 name = "langchain-learning"
 version = "0.1.0"
 source = { virtual = "." }
@@ -775,12 +800,12 @@ dependencies = [
     { name = "dotenv" },
     { name = "faiss-cpu" },
     { name = "ipykernel" },
-    { name = "langchain", extra = ["google-genai"] },
+    { name = "langchain" },
     { name = "langchain-community" },
     { name = "langchain-google-genai" },
+    { name = "langchain-groq" },
     { name = "langgraph" },
     { name = "pydantic" },
-    { name = "pydentic" },
     { name = "python-dotenv" },
     { name = "requests" },
 ]
@@ -790,12 +815,13 @@ requires-dist = [
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "faiss-cpu", specifier = ">=1.14.3" },
     { name = "ipykernel", specifier = ">=7.3.0" },
-    { name = "langchain", extras = ["google-genai"], specifier = ">=1.3.13" },
+    { name = "langchain", specifier = ">=1.3.13" },
     { name = "langchain-community", specifier = ">=0.4.2" },
     { name = "langchain-google-genai", specifier = ">=4.2.7" },
+    { name = "langchain-groq", specifier = ">=1.1.3" },
     { name = "langgraph", specifier = ">=1.2.9" },
+    { name = "pydantic", specifier = ">=0.0.1.dev3" },
     { name = "pydantic", specifier = ">=2.13.4" },
-    { name = "pydentic", specifier = ">=0.0.1.dev3" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "requests", specifier = ">=2.34.2" },
 ]
@@ -1282,18 +1308,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pydentic"
-version = "0.0.1.dev3"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "python-stdnum" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f8/2e/f14d8bc4141b680db8e8b175c167c38ff02c67569ac276f461a02f300cdd/pydentic-0.0.1.dev3.tar.gz", hash = "sha256:4c5ee9c260e3cbcdb2a2d725b1d98046cb2b5298e6d6154449a685cf4cca85ec", size = 6959, upload-time = "2021-03-11T00:34:55.51Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/87/cc/91315af0dd1248fff43ce8e94bb19a7b480962115a632d59bc3f9f85f92c/pydentic-0.0.1.dev3-py3-none-any.whl", hash = "sha256:b37f690f262e02e781deae8588a411c596489bc2837701fbb5e8c59b31b4236e", size = 6903, upload-time = "2021-03-11T00:34:53.744Z" },
-]
-
-[[package]]
 name = "pygments"
 version = "2.20.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1321,15 +1335,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/82/ed/0301aeeac3e5353ef3d94b6ec08bbcabd04a72018415dcb29e588514bba8/python_dotenv-1.2.2.tar.gz", hash = "sha256:2c371a91fbd7ba082c2c1dc1f8bf89ca22564a087c2c287cd9b662adde799cf3", size = 50135, upload-time = "2026-03-01T16:00:26.196Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0b/d7/1959b9648791274998a9c3526f6d0ec8fd2233e4d4acce81bbae76b44b2a/python_dotenv-1.2.2-py3-none-any.whl", hash = "sha256:1d8214789a24de455a8b8bd8ae6fe3c6b69a5e3d64aa8a8e5d68e694bbcb285a", size = 22101, upload-time = "2026-03-01T16:00:25.09Z" },
-]
-
-[[package]]
-name = "python-stdnum"
-version = "2.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/15/7f/96c2b9de6024353177dc6139c33730d5ac25877bc33215515d6b95b84555/python_stdnum-2.2.tar.gz", hash = "sha256:e95fcfa858a703d4a40130cb3eaac133c60d8808a7f3c98efeedac968c2479b9", size = 1311813, upload-time = "2026-01-04T19:36:16.753Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2f/61/aa32d9c79f83a2fae033cd6496fb2a24aba918d31c73704271dfcfb48375/python_stdnum-2.2-py3-none-any.whl", hash = "sha256:bdf98fd117a0ca152e4047aa8ad254bae63853d4e915ddd4e0effb33ba0e9260", size = 1193213, upload-time = "2026-01-04T19:36:14.812Z" },
 ]
 
 [[package]]
