@@ -142,13 +142,12 @@ graph_builder.add_conditional_edges(
 graph_builder.add_conditional_edges(
     "classifier",
     lambda state: state["message_intent"],
-    {"chat": "chat_agent", "code": "coding_agent", "knowledge": "rag_agent"},
+    {"chat": "chat_agent", "code": "accept_coding", "knowledge": "rag_agent"},
 )
 
 graph_builder.add_edge("chat_agent", END)
 graph_builder.add_edge("coding_agent", END)
 graph_builder.add_edge("rag_agent", END)
-# graph_builder.add_edge("accept_coding", END)
 
 checkpointer = InMemorySaver()
 graph = graph_builder.compile(checkpointer=checkpointer)
