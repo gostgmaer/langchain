@@ -1,0 +1,9 @@
+langchain
+langchain_community
+dotenv
+faiss-cpu
+langchain-google-genai
+langgraph
+pydantic
+python-dotenv
+requests
