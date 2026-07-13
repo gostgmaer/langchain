@@ -79,9 +79,8 @@ def accept_coding(state: State):
     desision = interrupt(f"User wants to code: {user_prompt} Yes or No")
     text = str(desision).strip().lower()
     if text in ["yes", "y", "ok", "approve", "continue"]:
-        return {
-            "messages": [{"role": "assistant", "content": "I will help you with that!"}]
-        }
+        return {'next_node': 'coding_agent'}
+       
     if text in ["no", "n", "cancel", "deny"]:
         return {
             "messages": [
@@ -92,7 +91,7 @@ def accept_coding(state: State):
             ],
             "next_node": "denied",
         }
-    return {"messages": [{"role": "user", "content": text}]}
+    return {"messages": [{"role": "user", "content": text}], "next_node": "accept_coding"}
 
 
 def get_retriever():
@@ -137,7 +136,8 @@ graph_builder.add_node("accept_coding", accept_coding)
 graph_builder.add_edge(START, "classifier")
 graph_builder.add_conditional_edges(
     "accept_coding",
-    lambda state: "end" if state.get("next_node") == "denied" else "coding_agent",{"end":END, "coding_agent": "coding_agent"}
+    lambda state: state.get("next_node", "accept_coding"),
+    {"coding_agent": "coding_agent", "denied": END, "accept_coding": "accept_coding"},
 )
 graph_builder.add_conditional_edges(
     "classifier",

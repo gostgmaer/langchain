@@ -62,7 +62,7 @@ def index_documents(docs_dir, save_path):
         print(f"Limited to {doc_limit} documents.")
 
     print(f"Loaded {len(documents)} documents. Splitting text...")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=100)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=12000, chunk_overlap=100)
     docs = text_splitter.split_documents(documents)
 
     total_chunks = len(docs)
