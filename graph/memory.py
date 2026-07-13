@@ -136,14 +136,15 @@ graph_builder.add_node("accept_coding", accept_coding)
 
 graph_builder.add_edge(START, "classifier")
 graph_builder.add_conditional_edges(
+    "accept_coding",
+    lambda state: "end" if state.get("next_node") == "denied" else "coding_agent",{"end":END, "coding_agent": "coding_agent"}
+)
+graph_builder.add_conditional_edges(
     "classifier",
     lambda state: state["message_intent"],
     {"chat": "chat_agent", "code": "coding_agent", "knowledge": "rag_agent"},
 )
-graph_builder.add_conditional_edges(
-    "accept_coding",
-    lambda state: "end" if state.get("next_node") == "denied" else "coding_agent",{"end":END, "coding_agent": "coding_agent"}
-)
+
 graph_builder.add_edge("chat_agent", END)
 graph_builder.add_edge("coding_agent", END)
 graph_builder.add_edge("rag_agent", END)
@@ -152,6 +153,7 @@ graph_builder.add_edge("rag_agent", END)
 checkpointer = InMemorySaver()
 graph = graph_builder.compile(checkpointer=checkpointer)
 
+graph.get_graph().draw_mermaid_png(output_file_path="graph.png")
 
 def run_chat():
     config = {"configurable": {"thread_id": uuid.uuid4()}}
