@@ -9,3 +9,4 @@ langgraph
 pydantic
 python-dotenv
 requests
+langchain-tavily
