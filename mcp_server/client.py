@@ -23,10 +23,10 @@ async def main():
     tools = await client.get_tools()
     agent = create_agent(model, tools)
 
-    # math_response = await agent.ainvoke(
-    #     {"messages": [{"role": "user", "content": "What is 5 + 3 and multiply by 8?"}]}
-    # )
-    # print("Math Response:", math_response["messages"][-1].content)
+    math_response = await agent.ainvoke(
+        {"messages": [{"role": "user", "content": "What is 5 + 3 and multiply by 8?"}]}
+    )
+    print("Math Response:", math_response["messages"][-1].content)
     # print(math_response["messages"][-1].content)
 
     weather_response = await agent.ainvoke(

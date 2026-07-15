@@ -5,6 +5,7 @@ langsmith
 langchain-community
 langchain-google-genai
 langchain-groq
+langchain_openai
 langgraph
 pydantic
 python-dotenv
