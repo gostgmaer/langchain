@@ -9,3 +9,4 @@ wheels/
 # Virtual environments
 .venv
 .env
+/RAG/data/vectordb_store
